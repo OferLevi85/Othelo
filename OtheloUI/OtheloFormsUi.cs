@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using OtheloBLL;
 
-namespace Othelo
+namespace OtheloUI
 {
     /// <summary>
     ///   This is the main class of the Windows Forms Othelo UI. It also the only class that interact directly with Othelo Logic.

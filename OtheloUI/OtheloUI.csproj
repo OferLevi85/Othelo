@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Othelo</RootNamespace>
     <AssemblyName>Othelo</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -22,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -31,23 +33,20 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="FormsUi\OtheloFormsUi.cs" />
-    <Compile Include="BLL\Board.cs" />
-    <Compile Include="FormsUi\BoardForm.cs">
+    <Compile Include="OtheloFormsUi.cs" />
+    <Compile Include="BoardForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BLL\GameEngine.cs" />
-    <Compile Include="FormsUi\GameSettingsForm.cs">
+    <Compile Include="GameSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BLL\Othelo.cs" />
-    <Compile Include="BLL\Player.cs" />
-    <Compile Include="FormsUi\TokenButton.cs">
+    <Compile Include="TokenButton.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
@@ -55,6 +54,15 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OtheloBLL\OtheloBLL.csproj">
+      <Project>{f821069d-e374-4222-a553-21eac2296e71}</Project>
+      <Name>OtheloBLL</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

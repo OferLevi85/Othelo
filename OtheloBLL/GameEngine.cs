@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Othelo
+namespace OtheloBLL
 {
     /// <summary>
     ///   This is the game's brain. It has full control on the game logic and AI
     /// </summary>
-    internal sealed class GameEngine
+    public sealed class GameEngine
     {
         /// <summary>
         ///   Definitions

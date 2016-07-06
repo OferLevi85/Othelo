@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using OtheloBLL;
 
-namespace Othelo
+namespace OtheloUI
 {
     /// <summary>
     ///   This class represent a token button that a user can press on.

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Othelo
+namespace OtheloBLL
 {
     /// <summary>
     ///   This is the container that holds Othelo game logic. It is used to initiate gaming sessions and keep them running as long as the user wants.
     ///   It is also the only class that interacts directly with the UI.
     /// </summary>
-    internal sealed class Othelo
+    public sealed class Othelo
     {
         /// <summary>
         ///   Definitions
