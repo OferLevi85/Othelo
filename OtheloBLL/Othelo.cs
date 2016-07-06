@@ -174,7 +174,7 @@ namespace OtheloBLL
             this.m_GameEngine = new GameEngine(this.m_TableSize);
 
             // 50% chance for each player to begin
-            this.m_CurrentPlayerTurn = GameEngine.s_RandMechanisem.Next() % 2 == 0 ? ePlayers.PlayerOne : ePlayers.PlayerTwo;
+            this.m_CurrentPlayerTurn = RandomDecision.GetRandomNumber(0, 1) == 0 ? ePlayers.PlayerOne : ePlayers.PlayerTwo;
             playRound();
         }
 

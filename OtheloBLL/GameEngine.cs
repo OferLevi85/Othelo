@@ -11,7 +11,6 @@ namespace OtheloBLL
         /// <summary>
         ///   Definitions
         /// </summary>
-        public static Random s_RandMechanisem = new Random(); // In order for true randomness to occur, don't create instances of this class. Use it as is through the program life.
 
         public enum eGetInputFromUser
         {
@@ -36,8 +35,8 @@ namespace OtheloBLL
             out Board.eTokenMarks[,] o_BoardStateInBestMove,
             out List<Board.TokenLocation> o_AvailableMoves)
         {
-            o_BoardStateInBestMove = null;
             int numberOfTokensReplacedInBestMove = 0;
+            o_BoardStateInBestMove = null;
             o_AvailableMoves = new List<Board.TokenLocation>();
             for (int rowN = 0; rowN < m_Board.BoardSize; ++rowN)
             {
@@ -57,7 +56,7 @@ namespace OtheloBLL
                         // (chances are not truely equal for each option, the last option has a better chance of being selected as it is only
                         // evaluated once. AI and Random mechanisem might be updated in later versions)
                         if (numberOfTokensReplaced > numberOfTokensReplacedInBestMove ||
-                            (numberOfTokensReplaced == numberOfTokensReplacedInBestMove && numberOfTokensReplaced > 0 && s_RandMechanisem.Next() % 2 == 0))
+                            (numberOfTokensReplaced == numberOfTokensReplacedInBestMove && numberOfTokensReplaced > 0 && RandomDecision.GetRandomNumber(0, 1) == 0))
                         {
                             o_BoardStateInBestMove = new Board.eTokenMarks[m_Board.BoardSize, m_Board.BoardSize];
                             Array.Copy(boardStateAfterPlacingToken, o_BoardStateInBestMove, boardStateAfterPlacingToken.Length);
