@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/OtheloBLL/bin
+/OtheloBLL/obj
+/OtheloUI/bin
+/OtheloUI/obj

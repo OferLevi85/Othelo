@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using OtheloBLL;
 
-namespace Othelo
+namespace OtheloUI
 {
     /// <summary>
     ///   This class is the graphic representation of the game board

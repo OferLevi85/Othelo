@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Othelo
+namespace OtheloBLL
 {
     /// <summary>
     ///   This struct is used to keep player records. No logic is used in these structs because GameEngine controlls AI and Human decides on moves by himself.
     /// </summary>
-    internal struct Player
+    public struct Player
     {
         public enum ePlayerType
         {

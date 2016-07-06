@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using OtheloBLL;
 
-namespace Othelo
+namespace OtheloUI
 {
     /// <summary>
     ///   The opening window, used for choosing table size and selecting the type of opponent.

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Othelo
+namespace OtheloBLL
 {
     /// <summary>
     ///   This class controls the game board. GameEngine decideds on moves and board makes them.
     /// </summary>
-    internal sealed class Board
+    public sealed class Board
     {
         /// <summary>
         ///   Definitions
