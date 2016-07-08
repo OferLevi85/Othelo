@@ -10,7 +10,7 @@ namespace OtheloUI
     /// <summary>
     ///   This is the main class of the Windows Forms Othelo UI. It also the only class that interact directly with Othelo Logic.
     /// </summary>
-    internal class OtheloFormsUi
+    internal class OtheloFormsUi: IDisposable
     {
         private void player_Selected_EventHandler(object sender, TokenButton.TokenClickedEventArgs e)
         {
@@ -56,6 +56,7 @@ namespace OtheloUI
             }
         }
 
+        [STAThread]
         public static void Main()
         {
             // Catch errors and display them as message instead of debug window.
@@ -116,5 +117,21 @@ Would you like another round?",
 
         private BoardForm m_BoardUiForm;
         private Othelo m_OtheloGame;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // dispose managed resources
+                m_BoardUiForm.Dispose();
+            }
+            // free native resources
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

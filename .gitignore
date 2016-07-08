@@ -49,3 +49,5 @@ Temporary Items
 /OtheloBLL/obj
 /OtheloUI/bin
 /OtheloUI/obj
+*.suo
+*.vsp
