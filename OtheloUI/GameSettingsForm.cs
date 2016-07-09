@@ -12,9 +12,6 @@ namespace OtheloUI
     /// </summary>
     internal class GameSettingsForm : Form
     {
-        private const string k_PlayComputerStr = "Play against the computer";
-        private const string k_PlayHumanStr = "Play against your friend";
-
         /// <summary>
         /// This method will be called once, just before the first time the form is displayed
         /// </summary>
@@ -22,7 +19,15 @@ namespace OtheloUI
         {
             base.OnLoad(e);
 
-            this.InitControls();
+            this.InitializeComponent();
+            this.InitCustomLayout();
+        }
+
+        private void SetBoardSizeButtonText()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameSettingsForm));
+            string resourceString = resources.GetString("m_ButtonBoardSize.Text");
+            this.m_ButtonBoardSize.Text = string.Format(resourceString, this.m_RequestedBoardSize);
         }
 
         /// <summary>
@@ -31,9 +36,7 @@ namespace OtheloUI
         private void m_ButtonBoardSize_Click(object sender, EventArgs e)
         {
             this.m_RequestedBoardSize += this.m_RequestedBoardSize < 14 ? 2 : 0;
-            string boardSizeButtonText;
-            this.createBoardSizeButtonText(out boardSizeButtonText);
-            this.m_ButtonBoardSize.Text = boardSizeButtonText;
+            SetBoardSizeButtonText();
         }
 
         /// <summary>
@@ -42,52 +45,53 @@ namespace OtheloUI
         private void m_ButtonStartGame_Click(object sender, EventArgs e)
         {
             Button buttonClicked = sender as Button;
-            this.m_SelectedOpponent = buttonClicked.Text == k_PlayComputerStr ? Player.ePlayerType.Computer : Player.ePlayerType.Human;
+            this.m_SelectedOpponent = buttonClicked.Name == "m_ButtonPlayAgainstComputer" ? Player.ePlayerType.Computer : Player.ePlayerType.Human;
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
-        public GameSettingsForm()
+        private void InitializeComponent()
         {
-            this.Size = new Size(300, 135);
-            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Text = "Othello - Game Settings";
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameSettingsForm));
+            this.m_ButtonBoardSize = new System.Windows.Forms.Button();
+            this.m_ButtonPlayAgainstComputer = new System.Windows.Forms.Button();
+            this.m_ButtonPlayAgainstHuman = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // m_ButtonBoardSize
+            // 
+            resources.ApplyResources(this.m_ButtonBoardSize, "m_ButtonBoardSize");
+            this.m_ButtonBoardSize.Name = "m_ButtonBoardSize";
+            this.m_ButtonBoardSize.Click += new System.EventHandler(this.m_ButtonBoardSize_Click);
+            // 
+            // m_ButtonPlayAgainstComputer
+            // 
+            resources.ApplyResources(this.m_ButtonPlayAgainstComputer, "m_ButtonPlayAgainstComputer");
+            this.m_ButtonPlayAgainstComputer.Name = "m_ButtonPlayAgainstComputer";
+            this.m_ButtonPlayAgainstComputer.Click += new System.EventHandler(this.m_ButtonStartGame_Click);
+            // 
+            // m_ButtonPlayAgainstHuman
+            // 
+            resources.ApplyResources(this.m_ButtonPlayAgainstHuman, "m_ButtonPlayAgainstHuman");
+            this.m_ButtonPlayAgainstHuman.Name = "m_ButtonPlayAgainstHuman";
+            this.m_ButtonPlayAgainstHuman.Click += new System.EventHandler(this.m_ButtonStartGame_Click);
+            // 
+            // GameSettingsForm
+            // 
+            resources.ApplyResources(this, "$this");
+            this.Controls.Add(this.m_ButtonBoardSize);
+            this.Controls.Add(this.m_ButtonPlayAgainstComputer);
+            this.Controls.Add(this.m_ButtonPlayAgainstHuman);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Name = "GameSettingsForm";
+            this.ResumeLayout(false);
+
         }
 
-        private void InitControls()
+        private void InitCustomLayout()
         {
             this.m_RequestedBoardSize = 6;
-            string boardSizeButtonText;
-            this.createBoardSizeButtonText(out boardSizeButtonText);
-            this.m_ButtonBoardSize.Text = boardSizeButtonText;
-            this.m_ButtonBoardSize.Location = new Point(8, 17);
-            this.m_ButtonBoardSize.Size = new Size(this.Size.Width - (this.m_ButtonBoardSize.Location.X * 2), 30);
-
-            this.m_ButtonPlayAgainstComputer.Text = k_PlayComputerStr;
-            this.m_ButtonPlayAgainstComputer.Location = new Point(this.m_ButtonBoardSize.Location.X, this.m_ButtonBoardSize.Bottom + 16);
-            this.m_ButtonPlayAgainstComputer.Size = new Size((this.m_ButtonBoardSize.Size.Width / 2) - 8, this.m_ButtonBoardSize.Size.Height);
-
-            this.m_ButtonPlayAgainstHuman.Text = k_PlayHumanStr;
-            this.m_ButtonPlayAgainstHuman.Location = new Point(
-                this.m_ButtonBoardSize.Right - this.m_ButtonPlayAgainstComputer.Size.Width,
-                this.m_ButtonPlayAgainstComputer.Top);
-            this.m_ButtonPlayAgainstHuman.Size = this.m_ButtonPlayAgainstComputer.Size;
-
-            this.Controls.AddRange(new Control[] { this.m_ButtonBoardSize, this.m_ButtonPlayAgainstComputer, this.m_ButtonPlayAgainstHuman });
-
-            this.m_ButtonBoardSize.Click += new EventHandler(this.m_ButtonBoardSize_Click);
-            this.m_ButtonPlayAgainstComputer.Click += new EventHandler(this.m_ButtonStartGame_Click);
-            this.m_ButtonPlayAgainstHuman.Click += new EventHandler(this.m_ButtonStartGame_Click);
-        }
-
-        private void createBoardSizeButtonText(out string o_BoardSizeButtonText)
-        {
-            StringBuilder boardSizeText = new StringBuilder();
-            boardSizeText.Append("Board Size: ");
-            boardSizeText.Append(this.m_RequestedBoardSize).Append("x").Append(this.m_RequestedBoardSize);
-            boardSizeText.Append(" (click to increase)");
-            o_BoardSizeButtonText = boardSizeText.ToString();
+            SetBoardSizeButtonText();
         }
 
         public int RequestedBoardSize
@@ -100,9 +104,9 @@ namespace OtheloUI
             get { return this.m_SelectedOpponent; }
         }
 
-        private Button m_ButtonBoardSize = new Button();
-        private Button m_ButtonPlayAgainstComputer = new Button();
-        private Button m_ButtonPlayAgainstHuman = new Button();
+        private Button m_ButtonBoardSize;
+        private Button m_ButtonPlayAgainstComputer;
+        private Button m_ButtonPlayAgainstHuman;
         private int m_RequestedBoardSize;
         private Player.ePlayerType m_SelectedOpponent;
     }
