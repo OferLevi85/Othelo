@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace OtheloBLL
 {
@@ -68,80 +69,41 @@ namespace OtheloBLL
         {
             public BoardChangedEventArgs(Board.eTokenMarks[,] i_BoardState, List<Board.TokenLocation> i_AvailableMoves)
             {
-                this.m_BoardState = i_BoardState;
-                this.m_AvailableMoves = i_AvailableMoves;
+                this.BoardState = i_BoardState;
+                this.AvailableMoves = i_AvailableMoves;
             }
 
-            public Board.eTokenMarks[,] BoardState
-            {
-                get { return this.m_BoardState; }
-            }
-
-            public List<Board.TokenLocation> AvailableMoves
-            {
-                get { return this.m_AvailableMoves; }
-            }
-
-            private Board.eTokenMarks[,] m_BoardState;
-            private List<Board.TokenLocation> m_AvailableMoves;
+            public readonly Board.eTokenMarks[,] BoardState;
+            public readonly List<Board.TokenLocation> AvailableMoves;
         }
 
         public class PlayerChangedEventArgs : EventArgs
         {
             public PlayerChangedEventArgs(Player i_Player, bool i_HasAvailableMoves)
             {
-                this.m_Player = i_Player;
-                this.m_HasAvailableMoves = i_HasAvailableMoves;
+                this.CurrentPlayer = i_Player;
+                this.HasMoves = i_HasAvailableMoves;
             }
 
-            public Player CurrentPlayer
-            {
-                get { return this.m_Player; }
-            }
-
-            public bool HasMoves
-            {
-                get { return this.m_HasAvailableMoves; }
-            }
-
-            private Player m_Player;
-            private bool m_HasAvailableMoves;
+            public readonly Player CurrentPlayer;
+            public readonly bool HasMoves;
         }
 
         public class GameFinishedEventArgs : EventArgs
         {
             public GameFinishedEventArgs(Player i_PlayerOne, int i_PlayerOneCurrentGameScore, Player i_PlayerTwo, int i_PlayerTwoCurrentGameScore)
             {
-                this.m_PlayerOne = i_PlayerOne;
-                this.m_PlayerOneCurrentGameScore = i_PlayerOneCurrentGameScore;
-                this.m_PlayerTwo = i_PlayerTwo;
-                this.m_PlayerTwoCurrentGameScore = i_PlayerTwoCurrentGameScore;
+                this.PlayerOne = i_PlayerOne;
+                this.PlayerOneCurrentGameScore = i_PlayerOneCurrentGameScore;
+                this.PlayerTwo = i_PlayerTwo;
+                this.PlayerTwoCurrentGameScore = i_PlayerTwoCurrentGameScore;
             }
 
-            public Player PlayerOne
-            {
-                get { return this.m_PlayerOne; }
-            }
+            public readonly Player PlayerOne;
+            public int PlayerOneCurrentGameScore { get; private set; }
 
-            public int PlayerOneCurrentGameScore
-            {
-                get { return this.m_PlayerOneCurrentGameScore; }
-            }
-
-            public Player PlayerTwo
-            {
-                get { return this.m_PlayerTwo; }
-            }
-
-            public int PlayerTwoCurrentGameScore
-            {
-                get { return this.m_PlayerTwoCurrentGameScore; }
-            }
-
-            private Player m_PlayerOne;
-            private int m_PlayerOneCurrentGameScore;
-            private Player m_PlayerTwo;
-            private int m_PlayerTwoCurrentGameScore;
+            public readonly Player PlayerTwo;
+            public int PlayerTwoCurrentGameScore { get; private set; }
         }
 
         /// <summary>
@@ -162,8 +124,8 @@ namespace OtheloBLL
         public void SetInitialSettings(int i_BoardSize, Player.ePlayerType i_OpponentType, string i_PlayerOneName, string i_PlayerTwoName)
         {
             this.m_TableSize = i_BoardSize;
-            string firstPlayerName = i_PlayerOneName == null ? "Black" : i_PlayerOneName;
-            string secondPlayerName = i_PlayerTwoName == null ? "White" : i_PlayerTwoName;
+            string firstPlayerName = (i_PlayerOneName == null) ? "Black" : i_PlayerOneName;
+            string secondPlayerName = (i_PlayerTwoName == null) ? "White" : i_PlayerTwoName;
             this.m_Players[0] = new Player(firstPlayerName, Player.ePlayerType.Human, Board.eTokenMarks.PlayerOneToken);
             this.m_Players[1] = new Player(secondPlayerName, i_OpponentType, Board.eTokenMarks.PlayerTwoToken);
             StartNewGame();
@@ -202,18 +164,18 @@ namespace OtheloBLL
         /// <summary>
         ///   Select the next player that can actually play (has moves available). If none is found, o_GameFinished will be marked true; 
         /// </summary>
-        private void getNextPlayer(out bool o_GameFinished)
+        private void getNextPlayer()
         {
             bool hasAvailableMoves;
             changePlayer(out hasAvailableMoves);
             if (hasAvailableMoves)
             {
-                o_GameFinished = false;
+                m_CurrentGameFinished = false;
             }
             else
             {
                 changePlayer(out hasAvailableMoves);
-                o_GameFinished = !hasAvailableMoves;
+                m_CurrentGameFinished = !hasAvailableMoves;
             }
         }
 
@@ -229,29 +191,32 @@ namespace OtheloBLL
 
         private void playRound()
         {
-            bool gameFinished;
-            getNextPlayer(out gameFinished);
+            getNextPlayer();
             Board.eTokenMarks[,] newBoardState;
             List<Board.TokenLocation> availableMoves = null;
 
             // If the current player is human, nothing to do but show available moves.
             // Else, if computer, play entire round and then switch turn for human player in order to show available moves.
-            if (!gameFinished && m_Players[(int)m_CurrentPlayerTurn].PlayerType == Player.ePlayerType.Human)
+            if (!m_CurrentGameFinished)
             {
-                updateAvailableMovesForHumanPlayer();
-            }
-            else if (!gameFinished && m_Players[(int)m_CurrentPlayerTurn].PlayerType == Player.ePlayerType.Computer)
-            {
-                m_GameEngine.GetBestPossibleMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState, out availableMoves);
-                updateBoardState(newBoardState, null);
-                getNextPlayer(out gameFinished);
-                if (!gameFinished)
+                switch (m_Players[(int)m_CurrentPlayerTurn].PlayerType)
                 {
-                    updateAvailableMovesForHumanPlayer();
+                    case Player.ePlayerType.Human:
+                        updateAvailableMovesForHumanPlayer();
+                        break;
+                    case Player.ePlayerType.Computer:
+                        m_GameEngine.GetBestPossibleMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState, out availableMoves);
+                        updateBoardState(newBoardState, null);
+                        getNextPlayer();
+                        if (!m_CurrentGameFinished)
+                        {
+                            updateAvailableMovesForHumanPlayer();
+                        }
+                        break;
                 }
             }
 
-            if (gameFinished)
+            if (m_CurrentGameFinished)
             {
                 finishGame();
             }
@@ -262,8 +227,9 @@ namespace OtheloBLL
             int playerOneScore;
             int playerTwoScore;
             m_GameEngine.GetCurrentScore(m_Players[(int)ePlayers.PlayerOne], m_Players[(int)ePlayers.PlayerTwo], out playerOneScore, out playerTwoScore);
-            m_Players[(int)ePlayers.PlayerOne].Score += playerOneScore > playerTwoScore ? 1 : 0;
-            m_Players[(int)ePlayers.PlayerTwo].Score += playerTwoScore > playerOneScore ? 1 : 0;
+            m_Players[(int)ePlayers.PlayerOne].TotalGamesScore += playerOneScore > playerTwoScore ? 1 : 0;
+            m_Players[(int)ePlayers.PlayerTwo].TotalGamesScore += playerTwoScore > playerOneScore ? 1 : 0;
+            m_CurrentGameFinished = false;
             onGameFinished(m_Players[(int)ePlayers.PlayerOne], playerOneScore, m_Players[(int)ePlayers.PlayerTwo], playerTwoScore);
         }
 
@@ -288,5 +254,6 @@ namespace OtheloBLL
         private GameEngine m_GameEngine;
         private Player[] m_Players;
         private ePlayers m_CurrentPlayerTurn;
+        private bool m_CurrentGameFinished;
     }
 }
