@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using OtheloBLL;
+using System.Threading;
 
 namespace OtheloUI
 {
@@ -28,22 +29,56 @@ namespace OtheloUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            this.InitControls();
+
+            this.InitializeComponent();
+            this.InitCustomLayout();
         }
 
-        private void InitControls()
+        private void InitializeComponent()
+        {
+            this.PlayerTurn = new System.Windows.Forms.Label();
+            this.SuspendLayout();
+            // 
+            // PlayerTurn
+            // 
+            this.PlayerTurn.AutoSize = true;
+            this.PlayerTurn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.PlayerTurn.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.PlayerTurn.Location = new System.Drawing.Point(12, 233);
+            this.PlayerTurn.Name = "PlayerTurn";
+            this.PlayerTurn.Size = new System.Drawing.Size(95, 20);
+            this.PlayerTurn.TabIndex = 0;
+            this.PlayerTurn.Text = "Player\'s turn";
+            // 
+            // BoardForm
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Controls.Add(this.PlayerTurn);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Name = "BoardForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Othello";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        private void InitCustomLayout()
         {
             foreach (TokenButton button in this.m_TokenButtons)
             {
                 this.Controls.Add(button);
             }
+
+            this.ClientSize = new Size(m_TotalSize, m_TotalSize + 100);
+            this.PlayerTurn.Location = new System.Drawing.Point(12, m_TotalSize + 40);
         }
 
         public BoardForm(int i_BoardSize)
         {
             int gameBoardXAxis = 0;
             int gameBoardYAxis = 0;
-            int totalSize = 0; // The board is a cube so no need to diffrentiate between height and width
+            m_TotalSize = 0; // The board is a cube so no need to diffrentiate between height and width
             this.m_TokenButtons = new TokenButton[i_BoardSize, i_BoardSize];
 
             for (int rowN = 0; rowN < i_BoardSize; ++rowN)
@@ -65,13 +100,37 @@ namespace OtheloUI
                     }
                 }
 
-                totalSize += this.m_TokenButtons[rowN, 0].Size.Width + 1;
+                m_TotalSize += this.m_TokenButtons[rowN, 0].Size.Width + 1;
             }
 
-            this.ClientSize = new Size(totalSize, totalSize);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "Othello";
+        }
+
+        //public void DrawPlayerNameAnimation(object obj)
+        //{
+        //    Animation.Animate(this.PlayerTurn, Animation.Effect.Roll, 3000, 360);
+        //}
+
+        public void PlayerChanged(object sender, Othelo.PlayerChangedEventArgs e)
+        {
+            if (this.PlayerTurn != null)
+            {
+                if (e.HasMoves)
+                {
+                    this.PlayerTurn.Text = e.CurrentPlayer.PlayerName + "'s turn!";
+                }
+                else
+                {
+                    this.PlayerTurn.Text = e.CurrentPlayer.PlayerName + " dosen't have available moves! turn will pass!";
+                }
+
+                //Thread AnimationThread = new Thread(new ParameterizedThreadStart(DrawPlayerNameAnimation));
+                //AnimationThread.Start();
+                //AnimationThread.Join();
+                Animation.Animate(this.PlayerTurn, Animation.Effect.Roll, 150, 360);
+            }    
         }
 
         /// <summary>
@@ -92,7 +151,7 @@ namespace OtheloUI
                     this.m_TokenButtons[rowN, colN].SetButtonStatus(i_BoardState[rowN, colN]);
                 }
             }
-        }
+         }
 
         /// <summary>
         ///   Display available moves for the human player.
@@ -104,5 +163,8 @@ namespace OtheloUI
         }
 
         private TokenButton[,] m_TokenButtons;
+
+        private Label PlayerTurn;
+        private int m_TotalSize = 0;
     }
 }

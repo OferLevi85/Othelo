@@ -25,7 +25,10 @@ namespace OtheloUI
 
         internal GameSettingsForm()
         {
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.StartPosition = FormStartPosition.CenterScreen;
+        }
+
         private void SetBoardSizeButtonText()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameSettingsForm));
