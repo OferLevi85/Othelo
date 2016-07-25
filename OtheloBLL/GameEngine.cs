@@ -52,14 +52,9 @@ namespace OtheloBLL
                             o_AvailableMoves.Add(new Board.TokenLocation(rowN, colN));
                         }
 
-                        // If option is better, update to current. If it is equally better to previous, select one of them at random
-                        // (chances are not truely equal for each option, the last option has a better chance of being selected as it is only
-                        // evaluated once. AI and Random mechanisem might be updated in later versions)
-                        if (numberOfTokensReplaced > numberOfTokensReplacedInBestMove ||
-                            (numberOfTokensReplaced == numberOfTokensReplacedInBestMove && numberOfTokensReplaced > 0 && RandomDecision.GetRandomNumber(0, 1) == 0))
+                        if (MoveIsBetter(numberOfTokensReplaced, numberOfTokensReplacedInBestMove))
                         {
-                            o_BoardStateInBestMove = new Board.eTokenMarks[m_Board.BoardSize, m_Board.BoardSize];
-                            Array.Copy(boardStateAfterPlacingToken, o_BoardStateInBestMove, boardStateAfterPlacingToken.Length);
+                            o_BoardStateInBestMove = boardStateAfterPlacingToken;
                             numberOfTokensReplacedInBestMove = numberOfTokensReplaced;
                         }
                     }
@@ -72,14 +67,24 @@ namespace OtheloBLL
             }
         }
 
+        // If option is equally better to previous, select one of them at random
+        // (chances are not truely equal for each option, the last option has a better chance of being selected as it is only
+        // evaluated once. AI and Random mechanisem might be updated in later versions)
+        private bool MoveIsBetter(int numberOfTokensReplaced, int numberOfTokensReplacedInBestMove)
+        {
+            return  (
+                        (numberOfTokensReplaced > numberOfTokensReplacedInBestMove) ||
+                        (
+                            (numberOfTokensReplaced == numberOfTokensReplacedInBestMove) &&
+                            (numberOfTokensReplaced > 0) &&
+                            (RandomDecision.GetRandomNumber(0, 1) == 0)
+                        )
+                    );
+        }
+
         public void UpdateCurrentBoardState(Board.eTokenMarks[,] i_NewBoardState)
         {
-            if (i_NewBoardState == null || i_NewBoardState.GetLength(0) != m_Board.BoardSize)
-            {
-                throw new ArgumentException("Input board state is null or in incorrect size");
-            }
-
-            m_Board.updateCurrentBoardState(i_NewBoardState);
+            m_Board.CurrentTableState = i_NewBoardState;
         }
 
         // Methods for interaction with human player
@@ -109,8 +114,16 @@ namespace OtheloBLL
             int numberOfCrosses;
             m_Board.GetTokensBalance(out numberOfCircles, out numberOfCrosses);
 
-            i_PlayerOneScore = i_PlayerOne.TokenMark == Board.eTokenMarks.PlayerTwoToken ? numberOfCircles : numberOfCrosses;
-            i_PlayerTwoScore = i_PlayerTwo.TokenMark == Board.eTokenMarks.PlayerTwoToken ? numberOfCircles : numberOfCrosses;
+            if (i_PlayerOne.TokenMark == Board.eTokenMarks.PlayerTwoToken)
+            {
+                i_PlayerOneScore = numberOfCircles;
+                i_PlayerTwoScore = numberOfCrosses;
+            }
+            else
+            {
+                i_PlayerOneScore = numberOfCrosses;
+                i_PlayerTwoScore = numberOfCircles;
+            }
         }
 
         public Board.eTokenMarks[,] CurrentTableState
