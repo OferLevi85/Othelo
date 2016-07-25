@@ -39,6 +39,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Animation.cs" />
     <Compile Include="OtheloFormsUi.cs" />
     <Compile Include="BoardForm.cs">
       <SubType>Form</SubType>
