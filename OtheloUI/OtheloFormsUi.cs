@@ -29,18 +29,6 @@ namespace OtheloUI
             }
         }
 
-        private void m_OtheloGame_PlayerChanged(object sender, Othelo.PlayerChangedEventArgs e)
-        {
-            if (e.HasMoves)
-            {
-                MessageBox.Show("It is now " + e.CurrentPlayer.PlayerName + "'s turn!");
-            }
-            else
-            {
-                MessageBox.Show(e.CurrentPlayer.PlayerName + " dosen't have available moves! turn will pass!");
-            }
-        }
-
         private void m_OtheloGame_GameFinished(object sender, Othelo.GameFinishedEventArgs e)
         {
             string gameFinishedMessage;
@@ -81,7 +69,7 @@ namespace OtheloUI
 
                 m_OtheloGame = new Othelo();
                 m_OtheloGame.m_BoardChangedDelegate += m_OtheloGame_BoardChanged;
-                m_OtheloGame.m_CurrentPlayerChangedDelegate += m_OtheloGame_PlayerChanged;
+                m_OtheloGame.m_CurrentPlayerChangedDelegate += m_BoardUiForm.PlayerChanged;
                 m_OtheloGame.m_GameFinishedDelegate += m_OtheloGame_GameFinished;
                 m_BoardUiForm.PlayerSelected += new TokenClickEventHandler(player_Selected_EventHandler);
                 m_OtheloGame.SetInitialSettings(gameSettingsForm.RequestedBoardSize, gameSettingsForm.OpponentType, null, null);
@@ -111,8 +99,8 @@ Would you like another round?",
                               winnerName,
                               e.PlayerOneCurrentGameScore,
                               e.PlayerTwoCurrentGameScore,
-                              ((Player)e.PlayerOne).Score,
-                              ((Player)e.PlayerTwo).Score);
+                              ((Player)e.PlayerOne).TotalGamesScore,
+                              ((Player)e.PlayerTwo).TotalGamesScore);
         }
 
         private BoardForm m_BoardUiForm;
