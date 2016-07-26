@@ -10,7 +10,7 @@ namespace OtheloUI
     /// <summary>
     ///   This is the main class of the Windows Forms Othelo UI. It also the only class that interact directly with Othelo Logic.
     /// </summary>
-    internal class OtheloFormsUi
+    internal class OtheloFormsUi: IDisposable
     {
         private void player_Selected_EventHandler(object sender, TokenButton.TokenClickedEventArgs e)
         {
@@ -27,18 +27,7 @@ namespace OtheloUI
                     m_BoardUiForm.SetAvailableMoveToken(squareLocation);
                 }
             }
-        }
 
-        private void m_OtheloGame_PlayerChanged(object sender, Othelo.PlayerChangedEventArgs e)
-        {
-            if (e.HasMoves)
-            {
-                MessageBox.Show("It is now " + e.CurrentPlayer.PlayerName + "'s turn!");
-            }
-            else
-            {
-                MessageBox.Show(e.CurrentPlayer.PlayerName + " dosen't have available moves! turn will pass!");
-            }
         }
 
         private void m_OtheloGame_GameFinished(object sender, Othelo.GameFinishedEventArgs e)
@@ -56,6 +45,7 @@ namespace OtheloUI
             }
         }
 
+        [STAThread]
         public static void Main()
         {
             // Catch errors and display them as message instead of debug window.
@@ -80,10 +70,10 @@ namespace OtheloUI
 
                 m_OtheloGame = new Othelo();
                 m_OtheloGame.m_BoardChangedDelegate += m_OtheloGame_BoardChanged;
-                m_OtheloGame.m_CurrentPlayerChangedDelegate += m_OtheloGame_PlayerChanged;
+                m_OtheloGame.m_CurrentPlayerChangedDelegate += m_BoardUiForm.PlayerChanged;
                 m_OtheloGame.m_GameFinishedDelegate += m_OtheloGame_GameFinished;
                 m_BoardUiForm.PlayerSelected += new TokenClickEventHandler(player_Selected_EventHandler);
-                m_OtheloGame.SetInitialSettings(gameSettingsForm.RequestedBoardSize, gameSettingsForm.OpponentType, null, null);
+                m_OtheloGame.SetInitialSettings(gameSettingsForm.RequestedBoardSize, gameSettingsForm.IsComputerOpponent, null, null);
                 m_BoardUiForm.ShowDialog();
             }
         }
@@ -110,11 +100,27 @@ Would you like another round?",
                               winnerName,
                               e.PlayerOneCurrentGameScore,
                               e.PlayerTwoCurrentGameScore,
-                              ((Player)e.PlayerOne).Score,
-                              ((Player)e.PlayerTwo).Score);
+                              ((Player)e.PlayerOne).TotalGamesScore,
+                              ((Player)e.PlayerTwo).TotalGamesScore);
         }
 
         private BoardForm m_BoardUiForm;
         private Othelo m_OtheloGame;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // dispose managed resources
+                m_BoardUiForm.Dispose();
+            }
+            // free native resources
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

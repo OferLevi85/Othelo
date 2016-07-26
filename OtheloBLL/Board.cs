@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -35,22 +36,12 @@ namespace OtheloBLL
         {
             public TokenLocation(int i_RowN, int i_ColN)
             {
-                m_ColN = i_ColN;
-                m_RowN = i_RowN;
+                ColN = i_ColN;
+                RowN = i_RowN;
             }
 
-            public int ColN
-            {
-                get { return m_ColN; }
-            }
-
-            public int RowN
-            {
-                get { return m_RowN; }
-            }
-
-            private int m_ColN;
-            private int m_RowN;
+            public readonly int ColN;
+            public readonly int RowN;
         }
 
         /// <summary>
@@ -60,16 +51,15 @@ namespace OtheloBLL
         /// <remarks>
         ///   Note - if o_NumberOfTokensReplaced == 0 and o_NewBoardState is null than placing a token will fail and a new token selection will be initiated (if existing)
         /// </remarks>
-        public void TryPlacingATokenOnBoard(eTokenMarks i_Token, int i_Row, int i_Col, out eTokenMarks[,] o_NewBoardState, out int o_NumberOfTokensReplaced)
-        {   
-            if (i_Row >= BoardSize || i_Row >= BoardSize || m_TableStateArr[i_Row, i_Col] != eTokenMarks.Blank)
+        public void PlaceToken(eTokenMarks i_Token, int i_Row, int i_Col, out eTokenMarks[,] o_NewBoardState, out int o_NumberOfTokensReplaced)
+        {
+            if (i_Row >= BoardSize || i_Row >= BoardSize || CurrentTableState[i_Row, i_Col] != eTokenMarks.Blank)
             {
                 throw new System.InvalidOperationException("Ileagal token location");
             }
 
             o_NumberOfTokensReplaced = 0;
-            o_NewBoardState = new eTokenMarks[BoardSize, BoardSize];
-            Array.Copy(m_TableStateArr, o_NewBoardState, m_TableStateArr.Length);
+            o_NewBoardState = CurrentTableState;
             foreach (eDirectionFromToken direction in Enum.GetValues(typeof(eDirectionFromToken)))
             {
                 int numberOfTokenReplacedForDirection = 0;
@@ -78,7 +68,7 @@ namespace OtheloBLL
                 performTokensReplacementForDirection(i_Token, direction, i_Row, i_Col, o_NewBoardState, out boardWithDirectionUpdated, out numberOfTokenReplacedForDirection);
                 if (numberOfTokenReplacedForDirection > 0 && boardWithDirectionUpdated != null)
                 {
-                    Array.Copy(boardWithDirectionUpdated, o_NewBoardState, boardWithDirectionUpdated.Length);
+                    o_NewBoardState = boardWithDirectionUpdated;
                     o_NumberOfTokensReplaced += numberOfTokenReplacedForDirection;
                 }
             }
@@ -106,7 +96,7 @@ namespace OtheloBLL
 
             int possibleNumberOfTokensReplaced = 0;
             bool reachedBorder;
-            eTokenMarks previousBoardState = eTokenMarks.Blank;
+            eTokenMarks previousTokenValue = eTokenMarks.Blank;
             int row = i_Row;
             int col = i_Col;
             do
@@ -114,24 +104,18 @@ namespace OtheloBLL
                 advanceInMatrix(i_Direction, ref row, ref col, out reachedBorder);
                 if (!reachedBorder)
                 {
-                    previousBoardState = boardStateWithUpdatedDirection[row, col];
+                    previousTokenValue = boardStateWithUpdatedDirection[row, col];
                     boardStateWithUpdatedDirection[row, col] = i_Token;
                 }
                 ++possibleNumberOfTokensReplaced;
             }
-            while (previousBoardState != i_Token && previousBoardState != eTokenMarks.Blank && !reachedBorder);
+            while (previousTokenValue != i_Token && previousTokenValue != eTokenMarks.Blank && !reachedBorder);
 
-            if (!reachedBorder && previousBoardState != eTokenMarks.Blank && possibleNumberOfTokensReplaced > 1)
+            if (!reachedBorder && previousTokenValue != eTokenMarks.Blank && possibleNumberOfTokensReplaced > 1)
             {
                 o_NumberOfTokenReplaced = possibleNumberOfTokensReplaced;
-                o_NewBoardState = new eTokenMarks[BoardSize, BoardSize];
-                Array.Copy(boardStateWithUpdatedDirection, o_NewBoardState, boardStateWithUpdatedDirection.Length);
+                o_NewBoardState = boardStateWithUpdatedDirection;
             }
-        }
-
-        public void updateCurrentBoardState(eTokenMarks[,] i_NewBoardState)
-        {
-            Array.Copy(i_NewBoardState, m_TableStateArr, i_NewBoardState.Length);
         }
 
         /// <summary>
@@ -142,10 +126,10 @@ namespace OtheloBLL
             o_NumberOfCircles = 0;
             o_NumberOfCrosses = 0;
 
-            foreach (eTokenMarks token in m_TableStateArr)
+            foreach (eTokenMarks token in CurrentTableState)
             {
-                o_NumberOfCircles += token == eTokenMarks.PlayerTwoToken ? 1 : 0;
-                o_NumberOfCrosses += token == eTokenMarks.PlayerOneToken ? 1 : 0;
+                o_NumberOfCircles += (token == eTokenMarks.PlayerTwoToken) ? 1 : 0;
+                o_NumberOfCrosses += (token == eTokenMarks.PlayerOneToken) ? 1 : 0;
             }
         }
 
@@ -193,12 +177,12 @@ namespace OtheloBLL
         public int BoardSize
         {
             // Note: table is always a square so number of rows == number of columns
-            get { return m_TableStateArr.GetLength(0); }
+            get { return CurrentTableState.GetLength(0); }
         }
 
         public eTokenMarks this[int i_Row, int i_Col]
         {
-            get { return m_TableStateArr[i_Row, i_Col]; }
+            get { return CurrentTableState[i_Row, i_Col]; }
         }
 
         /// <remarks>
@@ -206,21 +190,13 @@ namespace OtheloBLL
         /// </remarks>
         public Board(int i_SizeOfTable)
         {
-            m_TableStateArr = new eTokenMarks[i_SizeOfTable, i_SizeOfTable];
-            m_TableStateArr[(i_SizeOfTable / 2) - 1, (i_SizeOfTable / 2) - 1] = eTokenMarks.PlayerTwoToken;
-            m_TableStateArr[(i_SizeOfTable / 2) - 1, (i_SizeOfTable / 2)] = eTokenMarks.PlayerOneToken;
-            m_TableStateArr[(i_SizeOfTable / 2), (i_SizeOfTable / 2) - 1] = eTokenMarks.PlayerOneToken;
-            m_TableStateArr[(i_SizeOfTable / 2), (i_SizeOfTable / 2)] = eTokenMarks.PlayerTwoToken;
+            CurrentTableState = new eTokenMarks[i_SizeOfTable, i_SizeOfTable];
+            CurrentTableState[(i_SizeOfTable / 2) - 1, (i_SizeOfTable / 2) - 1] = eTokenMarks.PlayerTwoToken;
+            CurrentTableState[(i_SizeOfTable / 2) - 1, (i_SizeOfTable / 2)] = eTokenMarks.PlayerOneToken;
+            CurrentTableState[(i_SizeOfTable / 2), (i_SizeOfTable / 2) - 1] = eTokenMarks.PlayerOneToken;
+            CurrentTableState[(i_SizeOfTable / 2), (i_SizeOfTable / 2)] = eTokenMarks.PlayerTwoToken;
         }
 
-        public eTokenMarks[,] CurrentTableState
-        {
-            get { return m_TableStateArr; }
-        }
-
-        /// <summary>
-        ///   Members
-        /// </summary>
-        private eTokenMarks[,] m_TableStateArr;
+        public eTokenMarks[,] CurrentTableState { get; set; }
     }
 }
