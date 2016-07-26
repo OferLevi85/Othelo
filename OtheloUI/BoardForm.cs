@@ -72,6 +72,7 @@ namespace OtheloUI
 
             this.ClientSize = new Size(m_TotalSize, m_TotalSize + 100);
             this.PlayerTurn.Location = new System.Drawing.Point(12, m_TotalSize + 40);
+            this.PlayerTurn.Text = m_CurrentPlayerName + "'s turn!";
         }
 
         public BoardForm(int i_BoardSize)
@@ -115,15 +116,21 @@ namespace OtheloUI
 
         public void PlayerChanged(object sender, Othelo.PlayerChangedEventArgs e)
         {
+            m_CurrentPlayerName = e.CurrentPlayer.PlayerName;
             if (this.PlayerTurn != null)
             {
+                if (this.PlayerTurn.Visible)
+                {
+                    Animation.Animate(this.PlayerTurn, Animation.Effect.Roll, 150, 360);
+                }
+
                 if (e.HasMoves)
                 {
-                    this.PlayerTurn.Text = e.CurrentPlayer.PlayerName + "'s turn!";
+                    this.PlayerTurn.Text = m_CurrentPlayerName + "'s turn!";
                 }
                 else
                 {
-                    this.PlayerTurn.Text = e.CurrentPlayer.PlayerName + " dosen't have available moves! turn will pass!";
+                    this.PlayerTurn.Text = m_CurrentPlayerName + " dosen't have available moves! turn will pass!";
                 }
 
                 //Thread AnimationThread = new Thread(new ParameterizedThreadStart(DrawPlayerNameAnimation));
@@ -166,5 +173,6 @@ namespace OtheloUI
 
         private Label PlayerTurn;
         private int m_TotalSize = 0;
+        private string m_CurrentPlayerName;
     }
 }

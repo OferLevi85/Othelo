@@ -115,18 +115,7 @@ namespace OtheloBLL
             out Board.eTokenMarks[,] o_NewBoardState,
             out int o_NumberOfTokensReplaced)
         {
-            if (i_HumanPlayer.PlayerType != Player.ePlayerType.Human)
-            {
-                throw new System.InvalidOperationException("This method can only be called when refering to a human player");
-            }
-
-            o_NewBoardState = null;
-            o_NumberOfTokensReplaced = 0;
-            m_Board.PlaceToken(i_HumanPlayer.TokenMark, i_SelectedLocation.RowN, i_SelectedLocation.ColN, out o_NewBoardState, out o_NumberOfTokensReplaced);
-            if (o_NumberOfTokensReplaced <= 0 || o_NewBoardState == null)
-            {
-                throw new ArgumentException("Method was supposed to be called with legal move but was called with invalid token placment");
-            }
+            i_HumanPlayer.GetPlayerMove(m_Board, i_SelectedLocation, out o_NewBoardState, out o_NumberOfTokensReplaced);
         }
 
         public void GetCurrentScore(Player i_PlayerOne, Player i_PlayerTwo, out int i_PlayerOneScore, out int i_PlayerTwoScore)

@@ -121,13 +121,21 @@ namespace OtheloBLL
         /// <param name="i_BoardSize"></param>
         /// <param name="i_PlayerOneName"> When called from Windows forms UI - will be null </param>
         /// <param name="i_PlayerTwoName"> When called from Windows forms UI - will be null</param>
-        public void SetInitialSettings(int i_BoardSize, Player.ePlayerType i_OpponentType, string i_PlayerOneName, string i_PlayerTwoName)
+        public void SetInitialSettings(int i_BoardSize, bool IsComputer, string i_PlayerOneName, string i_PlayerTwoName)
         {
             this.m_TableSize = i_BoardSize;
             string firstPlayerName = (i_PlayerOneName == null) ? "Black" : i_PlayerOneName;
             string secondPlayerName = (i_PlayerTwoName == null) ? "White" : i_PlayerTwoName;
-            this.m_Players[0] = new Player(firstPlayerName, Player.ePlayerType.Human, Board.eTokenMarks.PlayerOneToken);
-            this.m_Players[1] = new Player(secondPlayerName, i_OpponentType, Board.eTokenMarks.PlayerTwoToken);
+            this.m_Players[0] = new HumanPlayer(firstPlayerName, Board.eTokenMarks.PlayerOneToken);
+            if (IsComputer)
+            {
+                this.m_Players[1] = new ComputerPlayer(secondPlayerName, Board.eTokenMarks.PlayerTwoToken);
+            }
+            else
+            {
+                this.m_Players[1] = new HumanPlayer(secondPlayerName, Board.eTokenMarks.PlayerTwoToken);
+            }
+            
             StartNewGame();
         }
 
@@ -145,7 +153,7 @@ namespace OtheloBLL
         /// </remarks>
         public void PlayHumanRound(Board.TokenLocation i_SelectedLocation)
         {
-            if (this.m_Players[(int)m_CurrentPlayerTurn].PlayerType != Player.ePlayerType.Human)
+            if (this.m_Players[(int)m_CurrentPlayerTurn] is ComputerPlayer)
             {
                 throw new InvalidOperationException("This method should only be called for human players.");
             }
@@ -191,32 +199,24 @@ namespace OtheloBLL
         private void playRound()
         {
             getNextPlayer();
-            Board.eTokenMarks[,] newBoardState;
 
             // If the current player is human, nothing to do but show available moves.
             // Else, if computer, play entire round and then switch turn for human player in order to show available moves.
-            if (!m_CurrentGameFinished)
+            while (!m_CurrentGameFinished && m_Players[(int)m_CurrentPlayerTurn] is ComputerPlayer)
             {
-                switch (m_Players[(int)m_CurrentPlayerTurn].PlayerType)
-                {
-                    case Player.ePlayerType.Human:
-                        updateAvailableMovesForHumanPlayer();
-                        break;
-                    case Player.ePlayerType.Computer:
-                        m_GameEngine.GetBestComputerMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState);
-                        updateBoardState(newBoardState, null);
-                        getNextPlayer();
-                        if (!m_CurrentGameFinished)
-                        {
-                            updateAvailableMovesForHumanPlayer();
-                        }
-                        break;
-                }
+                Board.eTokenMarks[,] newBoardState;
+                m_GameEngine.GetBestComputerMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState);
+                updateBoardState(newBoardState, null);
+                getNextPlayer();
             }
 
             if (m_CurrentGameFinished)
             {
                 finishGame();
+            }
+            else
+            {
+                updateAvailableMovesForHumanPlayer();
             }
         }
 

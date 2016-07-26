@@ -27,6 +27,7 @@ namespace OtheloUI
                     m_BoardUiForm.SetAvailableMoveToken(squareLocation);
                 }
             }
+
         }
 
         private void m_OtheloGame_GameFinished(object sender, Othelo.GameFinishedEventArgs e)
@@ -72,7 +73,7 @@ namespace OtheloUI
                 m_OtheloGame.m_CurrentPlayerChangedDelegate += m_BoardUiForm.PlayerChanged;
                 m_OtheloGame.m_GameFinishedDelegate += m_OtheloGame_GameFinished;
                 m_BoardUiForm.PlayerSelected += new TokenClickEventHandler(player_Selected_EventHandler);
-                m_OtheloGame.SetInitialSettings(gameSettingsForm.RequestedBoardSize, gameSettingsForm.OpponentType, null, null);
+                m_OtheloGame.SetInitialSettings(gameSettingsForm.RequestedBoardSize, gameSettingsForm.IsComputerOpponent, null, null);
                 m_BoardUiForm.ShowDialog();
             }
         }

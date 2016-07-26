@@ -51,7 +51,6 @@ namespace OtheloUI
         private void m_ButtonStartGame_Click(object sender, EventArgs e)
         {
             Button buttonClicked = sender as Button;
-            this.m_SelectedOpponent = buttonClicked.Name == "m_ButtonPlayAgainstComputer" ? Player.ePlayerType.Computer : Player.ePlayerType.Human;
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -105,15 +104,9 @@ namespace OtheloUI
             get { return this.m_RequestedBoardSize; }
         }
 
-        public Player.ePlayerType OpponentType
-        {
-            get { return this.m_SelectedOpponent; }
-        }
-
         private Button m_ButtonBoardSize;
         private Button m_ButtonPlayAgainstComputer;
         private Button m_ButtonPlayAgainstHuman;
         private int m_RequestedBoardSize;
-        private Player.ePlayerType m_SelectedOpponent;
     }
 }
