@@ -27,17 +27,14 @@ namespace OtheloBLL
         ///   Methods for managing moves in board
         /// </summary>
         /// <remarks>
-        ///   Used for receiving the best possible move but also returns all legal moves a player can make.
+        ///   Used for receiving the possible moves a player can make
         /// </remarks>
-        /// <param name="o_AvailableMoves"> Used for receiving all available moves for player (so UI can later display his options)</param>
-        public void GetBestPossibleMove(
+        /// <param name="o_AvailableMoves">List of available moves</param>
+        public void GetPossibleMoves(
             Board.eTokenMarks i_Token,
-            out Board.eTokenMarks[,] o_BoardStateInBestMove,
             out List<Board.TokenLocation> o_AvailableMoves)
         {
-            int numberOfTokensReplacedInBestMove = 0;
-            o_BoardStateInBestMove = null;
-            o_AvailableMoves = new List<Board.TokenLocation>();
+            o_AvailableMoves = null;
             for (int rowN = 0; rowN < m_Board.BoardSize; ++rowN)
             {
                 for (int colN = 0; colN < m_Board.BoardSize; ++colN)
@@ -46,11 +43,40 @@ namespace OtheloBLL
                     {
                         int numberOfTokensReplaced;
                         Board.eTokenMarks[,] boardStateAfterPlacingToken;
-                        m_Board.TryPlacingATokenOnBoard(i_Token, rowN, colN, out boardStateAfterPlacingToken, out numberOfTokensReplaced);
+                        m_Board.PlaceToken(i_Token, rowN, colN, out boardStateAfterPlacingToken, out numberOfTokensReplaced);
                         if (numberOfTokensReplaced > 0)
                         {
+                            if (o_AvailableMoves == null)
+                            {
+                                o_AvailableMoves = new List<Board.TokenLocation>();
+                            }
+
                             o_AvailableMoves.Add(new Board.TokenLocation(rowN, colN));
                         }
+                    }
+                }
+            }
+        }
+
+        /// <remarks>
+        ///   Used for getting the computer move
+        /// </remarks>
+        /// <param name="o_BoardStateInBestMove"> New board state after computer moved</param>
+        public void GetBestComputerMove(
+            Board.eTokenMarks i_Token,
+            out Board.eTokenMarks[,] o_BoardStateInBestMove)
+        {
+            int numberOfTokensReplacedInBestMove = 0;
+            o_BoardStateInBestMove = null;
+            for (int rowN = 0; rowN < m_Board.BoardSize; ++rowN)
+            {
+                for (int colN = 0; colN < m_Board.BoardSize; ++colN)
+                {
+                    if (m_Board[rowN, colN] == Board.eTokenMarks.Blank)
+                    {
+                        int numberOfTokensReplaced;
+                        Board.eTokenMarks[,] boardStateAfterPlacingToken;
+                        m_Board.PlaceToken(i_Token, rowN, colN, out boardStateAfterPlacingToken, out numberOfTokensReplaced);
 
                         if (MoveIsBetter(numberOfTokensReplaced, numberOfTokensReplacedInBestMove))
                         {
@@ -59,11 +85,6 @@ namespace OtheloBLL
                         }
                     }
                 }
-            }
-
-            if (numberOfTokensReplacedInBestMove == 0)
-            {
-                o_AvailableMoves = null;
             }
         }
 
@@ -101,7 +122,7 @@ namespace OtheloBLL
 
             o_NewBoardState = null;
             o_NumberOfTokensReplaced = 0;
-            m_Board.TryPlacingATokenOnBoard(i_HumanPlayer.TokenMark, i_SelectedLocation.RowN, i_SelectedLocation.ColN, out o_NewBoardState, out o_NumberOfTokensReplaced);
+            m_Board.PlaceToken(i_HumanPlayer.TokenMark, i_SelectedLocation.RowN, i_SelectedLocation.ColN, out o_NewBoardState, out o_NumberOfTokensReplaced);
             if (o_NumberOfTokensReplaced <= 0 || o_NewBoardState == null)
             {
                 throw new ArgumentException("Method was supposed to be called with legal move but was called with invalid token placment");

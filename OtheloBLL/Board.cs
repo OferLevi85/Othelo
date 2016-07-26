@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -50,7 +51,7 @@ namespace OtheloBLL
         /// <remarks>
         ///   Note - if o_NumberOfTokensReplaced == 0 and o_NewBoardState is null than placing a token will fail and a new token selection will be initiated (if existing)
         /// </remarks>
-        public void TryPlacingATokenOnBoard(eTokenMarks i_Token, int i_Row, int i_Col, out eTokenMarks[,] o_NewBoardState, out int o_NumberOfTokensReplaced)
+        public void PlaceToken(eTokenMarks i_Token, int i_Row, int i_Col, out eTokenMarks[,] o_NewBoardState, out int o_NumberOfTokensReplaced)
         {
             if (i_Row >= BoardSize || i_Row >= BoardSize || CurrentTableState[i_Row, i_Col] != eTokenMarks.Blank)
             {
@@ -58,7 +59,6 @@ namespace OtheloBLL
             }
 
             o_NumberOfTokensReplaced = 0;
-            o_NewBoardState = new eTokenMarks[BoardSize, BoardSize];
             o_NewBoardState = CurrentTableState;
             foreach (eDirectionFromToken direction in Enum.GetValues(typeof(eDirectionFromToken)))
             {

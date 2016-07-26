@@ -181,10 +181,9 @@ namespace OtheloBLL
 
         private void changePlayer(out bool o_HasAvailableMoves)
         {
-            Board.eTokenMarks[,] newBoardState;
             List<Board.TokenLocation> availableMoves = null;
             m_CurrentPlayerTurn = m_CurrentPlayerTurn == ePlayers.PlayerOne ? ePlayers.PlayerTwo : ePlayers.PlayerOne;
-            m_GameEngine.GetBestPossibleMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState, out availableMoves);
+            m_GameEngine.GetPossibleMoves(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out availableMoves);
             o_HasAvailableMoves = availableMoves != null;
             onCurrentPlayerChanged(m_Players[(int)m_CurrentPlayerTurn], o_HasAvailableMoves);
         }
@@ -193,7 +192,6 @@ namespace OtheloBLL
         {
             getNextPlayer();
             Board.eTokenMarks[,] newBoardState;
-            List<Board.TokenLocation> availableMoves = null;
 
             // If the current player is human, nothing to do but show available moves.
             // Else, if computer, play entire round and then switch turn for human player in order to show available moves.
@@ -205,7 +203,7 @@ namespace OtheloBLL
                         updateAvailableMovesForHumanPlayer();
                         break;
                     case Player.ePlayerType.Computer:
-                        m_GameEngine.GetBestPossibleMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState, out availableMoves);
+                        m_GameEngine.GetBestComputerMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState);
                         updateBoardState(newBoardState, null);
                         getNextPlayer();
                         if (!m_CurrentGameFinished)
@@ -235,9 +233,8 @@ namespace OtheloBLL
 
         private void updateAvailableMovesForHumanPlayer()
         {
-            Board.eTokenMarks[,] newBoardState;
             List<Board.TokenLocation> availableMoves = null;
-            m_GameEngine.GetBestPossibleMove(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out newBoardState, out availableMoves);
+            m_GameEngine.GetPossibleMoves(m_Players[(int)m_CurrentPlayerTurn].TokenMark, out availableMoves);
             updateBoardState(m_GameEngine.CurrentTableState, availableMoves);
         }
 
