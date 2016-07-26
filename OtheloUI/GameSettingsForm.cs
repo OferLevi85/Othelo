@@ -51,6 +51,7 @@ namespace OtheloUI
         private void m_ButtonStartGame_Click(object sender, EventArgs e)
         {
             Button buttonClicked = sender as Button;
+            this.IsComputerOpponent = (buttonClicked.Name == "m_ButtonPlayAgainstComputer");
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -108,5 +109,6 @@ namespace OtheloUI
         private Button m_ButtonPlayAgainstComputer;
         private Button m_ButtonPlayAgainstHuman;
         private int m_RequestedBoardSize;
+        public bool IsComputerOpponent { get; private set; }
     }
 }
